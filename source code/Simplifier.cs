@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -348,7 +349,13 @@ namespace final_project {
                     .ToList();
             }
 
-            return rightPart.Select(c => c.ToString()).ToList();
+            MatchCollection matches = Regex.Matches(rightPart, @"[A-Z][A-Za-z0-9_']*|[a-z][A-Za-z0-9_']*|\S");
+            string reconstructed = string.Concat(matches.Cast<Match>().Select(match => match.Value));
+            if (reconstructed != rightPart) {
+                return new List<string>();
+            }
+
+            return matches.Cast<Match>().Select(match => match.Value).ToList();
         }
 
         private bool isValidSymbol(string symbol) {
@@ -365,24 +372,34 @@ namespace final_project {
         }
 
         public static string read() {
-            return Console.ReadLine();
+            return Console.ReadLine() ?? "";
         }
 
         public static void print(Object o) {
-            Console.WriteLine(o.ToString());
+            Console.WriteLine(o == null ? "" : o.ToString());
         }
 
         public static void print(Object o, bool line) {
-            Console.Write(o.ToString());
+            Console.Write(o == null ? "" : o.ToString());
         }
 
         public static void clearLine() {
-            Console.SetCursorPosition(0, Console.CursorTop - 1);
-            int currentLineCursor = Console.CursorTop;
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, currentLineCursor);
-            print("");
+            try {
+                if (Console.CursorTop <= 0) {
+                    return;
+                }
+
+                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                int currentLineCursor = Console.CursorTop;
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write(new string(' ', Console.WindowWidth));
+                Console.SetCursorPosition(0, currentLineCursor);
+                print("");
+            } catch (ArgumentOutOfRangeException) {
+                return;
+            } catch (IOException) {
+                return;
+            }
         }
 
         class Rule {
